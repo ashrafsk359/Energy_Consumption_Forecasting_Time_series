@@ -51,8 +51,7 @@ A modular, interactive system for forecasting energy usage using SARIMA, Prophet
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/energy-forecasting-system.git
-cd energy-forecasting-system
+git clone https://github.com/ashrafsk359/Energy_Consumption_Forecasting_Time_series
 
 # (Optional) Set up virtual environment
 python -m venv venv
@@ -62,14 +61,13 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 
 # Run the web app
-streamlit run app.py  # or python app.py for Flask
+python app.py
 ```
 
 ---
 
 ## 📎 Notes
 
-- Large files (models or datasets) are stored via Git LFS or external links (Google Drive).
 - Replace placeholders in code for model paths, dataset paths, or streamlit/flask selection.
 - If datasets are not included, download from the original source above.
 
