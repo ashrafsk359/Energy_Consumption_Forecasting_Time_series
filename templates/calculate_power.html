@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Consumption Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='calculate_power.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Power Consumption Analyzer</h1>
+        
+        <div class="equipment-section">
+            <h2>Equipment Details</h2>
+            <div class="equipment-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Equipment</th>
+                            <th>Quantity</th>
+                            <th>Wattage</th>
+                            <th>Hours/day</th>
+                            <th>Daily kWh</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="equipmentTableBody">
+                        <tr>
+                            <td><input type="text" class="name" value="TV"></td>
+                            <td><input type="number" class="quantity" value="1" min="0"></td>
+                            <td><input type="number" class="wattage" value="100" min="0"></td>
+                            <td><input type="number" class="hours" value="4" min="0" max="24" step="0.5"></td>
+                            <td class="daily-kwh">0.4</td>
+                            <td><button class="remove-btn">Remove</button></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="name" value="AC"></td>
+                            <td><input type="number" class="quantity" value="1" min="0"></td>
+                            <td><input type="number" class="wattage" value="1500" min="0"></td>
+                            <td><input type="number" class="hours" value="8" min="0" max="24" step="0.5"></td>
+                            <td class="daily-kwh">12.0</td>
+                            <td><button class="remove-btn">Remove</button></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="name" value="Fridge"></td>
+                            <td><input type="number" class="quantity" value="1" min="0"></td>
+                            <td><input type="number" class="wattage" value="200" min="0"></td>
+                            <td><input type="number" class="hours" value="24" min="0" max="24" step="0.5"></td>
+                            <td class="daily-kwh">4.8</td>
+                            <td><button class="remove-btn">Remove</button></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="name" value="Washing Machine"></td>
+                            <td><input type="number" class="quantity" value="1" min="0"></td>
+                            <td><input type="number" class="wattage" value="200" min="0"></td>
+                            <td><input type="number" class="hours" value="1" min="0" max="24" step="0.5"></td>
+                            <td class="daily-kwh">0.2</td>
+                            <td><button class="remove-btn">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button id="addEquipmentBtn" class="add-btn">Add Equipment</button>
+                <button id="updateBtn" class="update-btn">Update Analysis</button>
+            </div>
+        </div>
+        
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3>Historical Consumption</h3>
+                <canvas id="historicalChart"></canvas>
+                <div id="historicalSummary" class="chart-summary"></div>
+            </div>
+            <div class="chart-container">
+                <h3>Consumption Forecast</h3>
+                <canvas id="predictionChart"></canvas>
+                <div id="predictionSummary" class="chart-summary"></div>
+            </div>
+        </div>
+        
+        <div class="consumption-breakdown">
+            <h2>Consumption Breakdown</h2>
+            <div class="breakdown-chart-container">
+                <canvas id="breakdownChart"></canvas>
+            </div>
+        </div>
+
+        <!-- New Section for Highest Consumer and Suggestion -->
+        <div class="suggestion-section">
+            <h2>Power Saving Recommendation</h2>
+            <div id="highestConsumer" class="suggestion-card">
+                <p><strong>Highest Consumer:</strong> <span id="highestEquipment">None</span> (<span id="highestConsumption">0</span> kWh/day)</p>
+                <p><strong>Suggestion:</strong> <span id="powerSuggestion">Add equipment to analyze consumption.</span></p>
+            </div>
+        </div>
+        
+        <div class="cost-section">
+            <div class="cost-card">
+                <h3>Daily Cost</h3>
+                <p id="dailyCost">₹0.00</p>
+                <p id="dailyConsumption">0.00 kWh</p>
+            </div>
+            <div class="cost-card">
+                <h3>Monthly Cost</h3>
+                <p id="monthlyCost">₹0.00</p>
+                <p id="monthlyConsumption">0.00 kWh</p>
+            </div>
+            <div class="cost-card">
+                <h3>Yearly Cost</h3>
+                <p id="yearlyCost">₹0.00</p>
+                <p id="yearlyConsumption">0.00 kWh</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let historicalChart, predictionChart, breakdownChart;
+        const costPerKWh = 10; // Adjust as needed
+
+        // Initialize all charts with default data
+        function initCharts() {
+            const historicalCtx = document.getElementById('historicalChart').getContext('2d');
+            historicalChart = new Chart(historicalCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Daily Consumption (kWh)',
+                        data: [
+                            { x: new Date('2025-04-01'), y: 20 },
+                            { x: new Date('2025-04-02'), y: 22 },
+                            { x: new Date('2025-04-03'), y: 19 }
+                        ],
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'time', time: { unit: 'day', tooltipFormat: 'MMM D, YYYY', displayFormats: { day: 'MMM D' } }, title: { display: true, text: 'Date' } },
+                        y: { title: { display: true, text: 'kWh' }, min: 0 }
+                    },
+                    plugins: {
+                        tooltip: { callbacks: { label: function(context) { return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} kWh`; } } }
+                    }
+                }
+            });
+            
+            const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+            predictionChart = new Chart(predictionCtx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Historical Consumption',
+                            data: [
+                                { x: new Date('2025-04-01'), y: 20 },
+                                { x: new Date('2025-04-02'), y: 22 },
+                                { x: new Date('2025-04-03'), y: 19 }
+                            ],
+                            borderColor: '#2196F3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Predicted Consumption',
+                            data: [
+                                { x: new Date('2025-04-04'), y: 21 },
+                                { x: new Date('2025-04-05'), y: 23 },
+                                { x: new Date('2025-04-06'), y: 20 }
+                            ],
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'time', time: { unit: 'day', tooltipFormat: 'MMM D, YYYY', displayFormats: { day: 'MMM D' } }, title: { display: true, text: 'Date' } },
+                        y: { title: { display: true, text: 'kWh' }, min: 0 }
+                    },
+                    plugins: {
+                        tooltip: { callbacks: { label: function(context) { return теми`${context.dataset.label}: ${context.parsed.y.toFixed(2)} kWh`; } } }
+                    }
+                }
+            });
+            
+            const breakdownCtx = document.getElementById('breakdownChart').getContext('2d');
+            breakdownChart = new Chart(breakdownCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['TV', 'AC', 'Fridge', 'Washing Machine'],
+                    datasets: [{
+                        data: [0.4, 12.0, 4.8, 0.2],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value.toFixed(2)} kWh (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Suggestion generator based on equipment name
+        function getPowerSavingSuggestion(equipmentName) {
+            const nameLower = equipmentName.toLowerCase();
+            if (nameLower.includes('ac') || nameLower.includes('air conditioner')) {
+                return "Set the AC to 24-26°C and use a timer to turn it off when not needed.";
+            } else if (nameLower.includes('tv') || nameLower.includes('television')) {
+                return "Reduce TV usage by turning it off when not watching and use power-saving mode.";
+            } else if (nameLower.includes('fridge') || nameLower.includes('refrigerator')) {
+                return "Keep the fridge door closed as much as possible and set it to an efficient temperature (3-5°C).";
+            } else if (nameLower.includes('washing') || nameLower.includes('washer')) {
+                return "Run full loads and use cold water cycles to save energy.";
+            } else if (nameLower.includes('heater')) {
+                return "Use a thermostat and insulate rooms to reduce heater runtime.";
+            } else {
+                return "Consider reducing usage hours or switching to an energy-efficient model.";
+            }
+        }
+
+        // Calculate equipment consumption and update table
+        function calculateEquipmentConsumption() {
+            let totalDailyConsumption = 0;
+            const equipmentData = [];
+            let highestConsumer = { name: 'None', consumption: 0 };
+            
+            document.querySelectorAll('#equipmentTableBody tr').forEach(row => {
+                const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                const wattage = parseFloat(row.querySelector('.wattage').value) || 0;
+                const hours = parseFloat(row.querySelector('.hours').value) || 0;
+                const dailyKwh = (quantity * wattage * hours) / 1000;
+                
+                row.querySelector('.daily-kwh').textContent = dailyKwh.toFixed(2);
+                totalDailyConsumption += dailyKwh;
+                
+                if (row.querySelector('.name').value) {
+                    const equipmentName = row.querySelector('.name').value;
+                    equipmentData.push({ name: equipmentName, consumption: dailyKwh });
+                    
+                    // Track highest consumer
+                    if (dailyKwh > highestConsumer.consumption) {
+                        highestConsumer = { name: equipmentName, consumption: dailyKwh };
+                    }
+                }
+            });
+            
+            // Update breakdown chart
+            breakdownChart.data.labels = equipmentData.map(item => item.name);
+            breakdownChart.data.datasets[0].data = equipmentData.map(item => item.consumption);
+            breakdownChart.update();
+            
+            // Update highest consumer and suggestion
+            if (highestConsumer.name !== 'None') {
+                document.getElementById('highestEquipment').textContent = highestConsumer.name;
+                document.getElementById('highestConsumption').textContent = highestConsumer.consumption.toFixed(2);
+                document.getElementById('powerSuggestion').textContent = getPowerSavingSuggestion(highestConsumer.name);
+            } else {
+                document.getElementById('highestEquipment').textContent = 'None';
+                document.getElementById('highestConsumption').textContent = '0';
+                document.getElementById('powerSuggestion').textContent = 'Add equipment to analyze consumption.';
+            }
+            
+            return totalDailyConsumption;
+        }
+
+        // Update cost display
+        function updateCost() {
+            const dailyConsumption = calculateEquipmentConsumption();
+            const dailyCost = dailyConsumption * costPerKWh;
+            
+            document.getElementById('dailyConsumption').textContent = `${dailyConsumption.toFixed(2)} kWh`;
+            document.getElementById('dailyCost').textContent = `₹${dailyCost.toFixed(2)}`;
+            document.getElementById('monthlyConsumption').textContent = `${(dailyConsumption * 30).toFixed(2)} kWh`;
+            document.getElementById('monthlyCost').textContent = `₹${(dailyCost * 30).toFixed(2)}`;
+            document.getElementById('yearlyConsumption').textContent = `${(dailyConsumption * 365).toFixed(2)} kWh`;
+            document.getElementById('yearlyCost').textContent = `₹${(dailyCost * 365).toFixed(2)}`;
+        }
+
+        // Update charts with data from server
+        function updateCharts() {
+            const equipment = [];
+            document.querySelectorAll('#equipmentTableBody tr').forEach(row => {
+                if (row.querySelector('.name').value) {
+                    equipment.push({
+                        name: row.querySelector('.name').value,
+                        quantity: parseFloat(row.querySelector('.quantity').value) || 0,
+                        wattage: parseFloat(row.querySelector('.wattage').value) || 0,
+                        hours: parseFloat(row.querySelector('.hours').value) || 0
+                    });
+                }
+            });
+
+            console.log('Sending equipment data:', equipment);
+
+            fetch('/analyze_power', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ equipment: equipment })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Server returned ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.historical && data.prediction) {
+                    const historicalData = data.historical.map(d => ({
+                        x: new Date(d.date),
+                        y: d.consumption
+                    }));
+                    historicalChart.data.datasets[0].data = historicalData;
+                    historicalChart.update();
+                    
+                    const historicalTotal = historicalData.reduce((sum, d) => sum + d.y, 0);
+                    const historicalAvg = historicalTotal / historicalData.length;
+                    document.getElementById('historicalSummary').innerHTML = `
+                        <p>Total: ${historicalTotal.toFixed(2)} kWh</p>
+                        <p>Average: ${historicalAvg.toFixed(2)} kWh/day</p>
+                        <p>Period: ${historicalData.length} days</p>
+                    `;
+                    
+                    const historicalForPrediction = historicalData.slice(-7);
+                    const predictionData = data.prediction.map(d => ({
+                        x: new Date(d.date),
+                        y: d.consumption
+                    }));
+                    
+                    predictionChart.data.datasets[0].data = historicalForPrediction;
+                    predictionChart.data.datasets[1].data = predictionData;
+                    predictionChart.update();
+                    
+                    const predictionTotal = predictionData.reduce((sum, d) => sum + d.y, 0);
+                    const predictionAvg = predictionTotal / predictionData.length;
+                    const changePercent = ((predictionAvg - historicalAvg) / historicalAvg * 100).toFixed(1);
+                    const changeClass = changePercent >= 0 ? 'up' : 'down';
+                    
+                    document.getElementById('predictionSummary').innerHTML = `
+                        <p>Forecast Average: ${predictionAvg.toFixed(2)} kWh/day</p>
+                        <p>Change: <span class="${changeClass}">${changePercent}%</span></p>
+                        <p>Period: ${predictionData.length} days</p>
+                    `;
+                    
+                    updateCost();
+                } else {
+                    console.warn('No valid server data, using default charts');
+                }
+            })
+            
+        }
+
+        // Function to add input listeners to a row
+        function addInputListeners(row) {
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', function() {
+                    updateCost();
+                    if (this.classList.contains('hours') || 
+                        this.classList.contains('wattage') || 
+                        this.classList.contains('quantity')) {
+                        updateCharts();
+                    }
+                });
+            });
+        }
+
+        // Add new equipment row
+        document.getElementById('addEquipmentBtn').addEventListener('click', function() {
+            const tableBody = document.getElementById('equipmentTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" class="name" placeholder="Equipment name"></td>
+                <td><input type="number" class="quantity" value="1" min="0"></td>
+                <td><input type="number" class="wattage" value="100" min="0"></td>
+                <td><input type="number" class="hours" value="4" min="0" max="24" step="0.5"></td>
+                <td class="daily-kwh">0.4</td>
+                <td><button class="remove-btn">Remove</button></td>
+            `;
+            tableBody.appendChild(newRow);
+            addInputListeners(newRow);
+            updateCost();
+        });
+
+        // Remove equipment row
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-btn')) {
+                const row = e.target.closest('tr');
+                row.remove();
+                updateCost();
+                updateCharts();
+            }
+        });
+
+        // Update analysis
+        document.getElementById('updateBtn').addEventListener('click', function() {
+            updateCharts();
+        });
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing charts...');
+            initCharts();
+            console.log('Charts initialized, updating charts...');
+            updateCharts();
+            console.log('Initial update complete');
+            
+            document.querySelectorAll('#equipmentTableBody tr').forEach(row => {
+                addInputListeners(row);
+            });
+        });
+    </script>
+
+
+    <style>
+        .container {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2, h3 {
+            color: #333;
+        }
+        
+        .equipment-table {
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            width: 90%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .remove-btn {
+            background-color: #f44336;
+        }
+        
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .add-btn {
+            background-color: #2196F3;
+        }
+        
+        .add-btn:hover {
+            background-color: #0b7dda;
+        }
+        
+        .charts-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .consumption-breakdown {
+            margin-bottom: 20px;
+        }
+        
+        .breakdown-chart-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .chart-summary {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .cost-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .cost-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .cost-card h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        
+        .cost-card p {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        
+        .up {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .down {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .daily-kwh {
+            font-weight: bold;
+            color: #2196F3;
+        }
+
+        .suggestion-section {
+            margin-bottom: 20px;
+        }
+        
+        .suggestion-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .suggestion-card p {
+            margin: 10px 0;
+        }
+        
+        .suggestion-card strong {
+            color: #2196F3;
+        }
+        
+    </style>
+</body>
+</html>

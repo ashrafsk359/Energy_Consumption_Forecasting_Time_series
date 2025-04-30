@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Consumption Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <h1>Power Consumption Analysis</h1>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <a href="/view_synthetic_data" class="card-link">
+                <span class="icon">📊</span>
+                <span class="text">View Synthetic Data</span>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/umap" class="card-link">
+                <span class="icon">🌐</span>
+                <span class="text">UMAP Visualization</span>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/future_prediction" class="card-link">
+                <span class="icon">🔮</span>
+                <span class="text">Future Power Consumption Prediction</span>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/visualizations" class="card-link">
+                <span class="icon">📈</span>
+                <span class="text">View All Visualizations</span>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/calculate_power_consumption" class="card-link">
+                <span class="icon">⚡</span>
+                <span class="text">Calculate Power Consumption</span>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/historical_plots" class="card-link">
+                <span class="icon">📅</span>
+                <span class="text">View Historical Power Consumption Plot</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

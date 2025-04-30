@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Time Series Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background: url('{{ url_for('static', filename='welcome.png') }}') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            text-align: center;
+        }
+
+        .welcome-container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay for readability */
+        }
+
+        #welcome-text {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #00ffff;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        #description {
+            font-size: 1.5rem;
+            max-width: 600px;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            color: #fff;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        .login-button {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .login-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div id="welcome-text"></div>
+        <div id="description">Explore the time based analysis of power consumption and also forecast future power consumption through this project.</div>
+        <a href="{{ url_for('login') }}" class="login-button">Please login to continue: LOGIN</a>
+    </div>
+
+    <script>
+        // Animate welcome text letter by letter
+        const welcomeText = "WELCOME TO THE TIME SERIES ANALYSIS";
+        const textElement = document.getElementById('welcome-text');
+        let index = 0;
+
+        function typeWriter() {
+            if (index < welcomeText.length) {
+                textElement.innerHTML += welcomeText.charAt(index);
+                index++;
+                setTimeout(typeWriter, 100); // Adjust speed (ms) here
+            }
+        }
+
+        // Fade in description after welcome text is done
+        function fadeInDescription() {
+            const description = document.getElementById('description');
+            setTimeout(() => {
+                description.style.opacity = 1;
+            }, welcomeText.length * 100 + 500); // Delay based on typing speed
+        }
+
+        // Start animations
+        window.onload = function() {
+            typeWriter();
+            fadeInDescription();
+        };
+    </script>
+</body>
+</html>

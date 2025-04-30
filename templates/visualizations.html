@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <h1>📈 Visualizations</h1>
+    </header>
+    
+    <div class="image-gallery">
+        <div class="image-card">
+            <img src="{{ url_for('static', filename='power_consumption_over_time.png') }}" alt="Power Consumption Over Time" onclick="openModal(this)">
+            <p>Power Consumption Over Time</p>
+        </div>
+        <div class="image-card">
+            <img src="{{ url_for('static', filename='correlation_matrix.png') }}" alt="Correlation Matrix" onclick="openModal(this)">
+            <p>Correlation Matrix</p>
+        </div>
+        <div class="image-card">
+            <img src="{{ url_for('static', filename='distribution_appliances.png') }}" alt="Distribution of Appliances" onclick="openModal(this)">
+            <p>Distribution of Appliances</p>
+        </div>
+        <div class="image-card">
+            <img src="{{ url_for('static', filename='umap_visualization.png') }}" alt="UMAP Visualization" onclick="openModal(this)">
+            <p>UMAP Visualization</p>
+        </div>
+        {% for feature in target_features %}
+        <div class="image-card">
+            <img src="{{ url_for('static', filename='actual_vs_predicted_' + feature + '.png') }}" alt="Actual vs Predicted {{ feature }}" onclick="openModal(this)">
+            <p>Actual vs Predicted {{ feature }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <div id="caption"></div>
+    </div>
+
+    <script>
+        // Function to open the modal and display the clicked image
+        function openModal(img) {
+            const modal = document.getElementById("imageModal");
+            const modalImg = document.getElementById("modalImage");
+            const captionText = document.getElementById("caption");
+
+            modal.style.display = "block";
+            modalImg.src = img.src;
+            captionText.innerHTML = img.alt;
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            const modal = document.getElementById("imageModal");
+            modal.style.display = "none";
+        }
+    </script>
+</body>
+</html>

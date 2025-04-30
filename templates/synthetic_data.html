@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <h1>📊 Synthetic Data</h1>
+    </header>
+    <div class="data-container">
+        <div class="table-wrapper">
+            {{ table_html | safe }}
+        </div>
+        
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('view_synthetic_data', page=page-1) }}" class="btn">Previous</a>
+            {% endif %}
+            <span>Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ url_for('view_synthetic_data', page=page+1) }}" class="btn">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
