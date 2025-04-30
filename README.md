@@ -1,5 +1,5 @@
 
-# 🔌 Energy Consumption Forecasting System
+# 🔌 Time Series Analysis by XGBoost Model for Future Prediction of Power Consumption
 
 A modular, interactive system for forecasting energy usage using SARIMA, Prophet, XGBoost, and LSTM models. It provides both appliance-level and area-level predictions and supports dynamic cost estimation based on user inputs.
 
