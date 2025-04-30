@@ -1,0 +1,7 @@
+D:\final\final project\models\xgb.py:49: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  plt.show()
+XGBoost Performance:
+MAE: 0.0486
+RMSE: 0.0687
+MAPE: 7.67%
+Model saved at models/xgb_model.pkl

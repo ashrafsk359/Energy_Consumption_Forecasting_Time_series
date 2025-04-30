@@ -1,0 +1,14 @@
+D:\final\final project\models\arima.py:33: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  plt.show()
+D:\final\final project\models\arima.py:65: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  plt.show()
+ADF Statistic: -15.675958024712367
+p-value: 1.4928009577731282e-28
+The series is stationary.
+ADF Statistic: -26.222532502791896
+p-value: 0.0
+The series is stationary.
+ARIMA Performance:
+MAE: 0.1034
+RMSE: 0.1388
+MAPE: 14.66%
